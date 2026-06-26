@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <chrono>
 
 struct DataPoint {
     int time_ns;
@@ -33,17 +34,24 @@ int main() {
         signal_data.push_back(current_point);
     }
     file.close();
-    std::cout << "[SUCCESS] Data sind im RAM. Große des Vektors: "
+    std::cout << "[SUCCESS] Data is in RAM. Vector's size: "
               << signal_data.size() << " samples\n";
 
     std::vector<DataPoint> filtered_data;
-    filtered_data.reserve(signal_data.size());
+    filtered_data.resize(signal_data.size());
+
+    auto start_time = std::chrono::high_resolution_clock::now();
+
+#pragma omp parallel for
     for (size_t i = 2; i < signal_data.size(); ++i) {
         double filtered_voltage = (signal_data[i-2].voltage + signal_data[i-1].voltage + signal_data[i].voltage) / 3.0;
-        DataPoint filtered_point{signal_data[i].time_ns, filtered_voltage};
-        filtered_data.push_back(filtered_point);
+        filtered_data[i].time_ns = signal_data[i].time_ns;
+        filtered_data[i].voltage = filtered_voltage;
     }
-    std::cout << "[SUCCESS] Фильтрация завершена. Очищено сэмплов: "
+    auto end_time = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start_time);
+    std::cout << "[PERF] Parallel filtration took: " << duration.count() << " microseconds\n";
+    std::cout << "[SUCCESS] Filtration ended. Lines: "
               << filtered_data.size() << "\n";
     std::ofstream file_out("qubit_filtered_data.csv");
     if (!file_out.is_open()) {
@@ -51,8 +59,8 @@ int main() {
         return 1;
     }
     file_out << "time_ns,voltage_mV\n";
-    for (const auto& point : filtered_data) {
-        file_out << point.time_ns << "," << point.voltage << "\n";
+    for (size_t i = 2; i < filtered_data.size(); ++i) {
+        file_out << filtered_data[i].time_ns << "," << filtered_data[i].voltage << "\n";
     }
     file_out.close();
 

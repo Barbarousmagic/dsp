@@ -1,1 +1,3 @@
 cmake-build-debug/
+dsp_app
+*.csv
