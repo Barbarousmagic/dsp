@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <chrono>
+#include <random>
 
 struct DataPoint {
     int time_ns;
@@ -11,31 +12,17 @@ struct DataPoint {
 };
 
 int main() {
-    std::cout << "[SYSTEM] Start... \n";
-    std::ifstream file("qubit_noise_data.csv");
-    if (!file.is_open()) {
-        std::cerr << "[ERROR] File not found!\n";
-        return 1;
-    }
+    const size_t NUM_SAMPLES = 50'000'000;
+    std::cout << "[SYSTEM] Generating " << NUM_SAMPLES << " samples...\n";
     std::vector<DataPoint> signal_data;
-    std::string line;
-    std::getline(file, line);
-    while (std::getline(file, line)) {
-        std::stringstream ss(line);
-        std::string time_str, volt_str;
-
-        std::getline(ss, time_str, ',');
-        std::getline(ss, volt_str, ',');
-
-        DataPoint current_point;
-        current_point.time_ns = std::stoi(time_str);
-        current_point.voltage = std::stod(volt_str);
-
-        signal_data.push_back(current_point);
+    signal_data.resize(NUM_SAMPLES);
+    std::mt19937 gen(1337);
+    std::normal_distribution<double> noise_dist(0.0, 5.0);
+    for (size_t i = 0; i < NUM_SAMPLES; ++i) {
+        signal_data[i].time_ns = i * 10;
+        signal_data[i].voltage = noise_dist(gen);
     }
-    file.close();
-    std::cout << "[SUCCESS] Data is in RAM. Vector's size: "
-              << signal_data.size() << " samples\n";
+    std::cout << "[SUCCESS] Array generation complete\n";
 
     std::vector<DataPoint> filtered_data;
     filtered_data.resize(signal_data.size());
