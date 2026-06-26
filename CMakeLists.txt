@@ -5,7 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 find_package(OpenMP REQUIRED)
 
-add_executable(linuxtest main.cpp)
+add_executable(linuxtest main.cpp
+        Tensor.h)
 
 if(OpenMP_CXX_FOUND)
     target_link_libraries(linuxtest PUBLIC OpenMP::OpenMP_CXX)
