@@ -17,12 +17,12 @@ public:
         data.resize(rows * cols, 0.0);
     }
     Tensor matmul(const Tensor& other) const {
-        if (this->cols != other.rows) {
+        if (cols != other.rows) {
             throw std::invalid_argument("Dimension mismatch: cols != other.rows");
         }
-        Tensor result(this->rows, other.cols);
-        for (int i = 0; i < this->rows; ++i) {
-            for (int k = 0; k < this->cols; ++k) {
+        Tensor result(rows, other.cols);
+        for (int i = 0; i < rows; ++i) {
+            for (int k = 0; k < cols; ++k) {
                 for (int j = 0; j < other.cols; ++j) {
                     result(i, j) += (*this)(i, k) * other(k, j);
                 }
@@ -30,6 +30,32 @@ public:
         }
         return result;
     }
+
+    Tensor add(const Tensor& other) const {
+        if (cols != other.cols || rows != other.rows) {
+            throw std::invalid_argument("Dimension mismatch");
+        }
+        Tensor result(rows, cols);
+        for (size_t i = 0; i < data.size(); ++i) {
+            result.data[i] =  data[i] + other.data[i];
+        }
+        return result;
+    }
+    Tensor transpose() const {
+        Tensor result(cols, rows);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) result(j, i) = (*this)(i, j);
+        }
+        return result;
+    }
+
+    void print() const {
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) std::cout << (*this)(i, j) << "\t";
+            std::cout << "\n";
+        }
+    }
+
     double& operator()(size_t r, size_t c){
         return data[r * cols + c];
     }
