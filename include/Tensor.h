@@ -49,6 +49,20 @@ public:
         return result;
     }
 
+    Tensor kronecker(const Tensor& other) const {
+        Tensor result(rows * other.rows, cols * other.cols);
+        for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < cols; ++j) {
+                for (size_t k = 0; k < other.rows; ++k) {
+                    for (size_t l = 0; l < other.cols; ++l) {
+                        result(i * other.rows + k, j * other.cols + l) = (*this)(i, j) * other(k, l);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
     void print() const {
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) std::cout << (*this)(i, j) << "\t";

@@ -6,15 +6,36 @@ int main() {
     Tensor qubit(2,1);
     qubit(0, 0) = 1.0;
     qubit(1, 0) = 0.0;
-    qubit.print();
+    //qubit.print();
 
     Tensor H(2, 2);
     double inv_sqrt2 = 1.0 / std::sqrt(2.0);
     H(0,0) = inv_sqrt2; H(0, 1) = inv_sqrt2;
     H(1,0) = inv_sqrt2; H(1, 1) = -inv_sqrt2;
-    H.print();
+    //H.print();
 
     Tensor superposition = H.matmul(qubit);
-    superposition.print();
+    //superposition.print();
+    Tensor q0(2, 1);
+    q0(0, 0) = 1.0;
+    q0(1, 0) = 0.0;
+    Tensor q1(2, 1);
+    q1(0, 0) = 1.0;
+    q1(1, 0) = 0.0;
+    Tensor q_sys = q0.kronecker(q1);
+    q_sys.print();
+    Tensor I(2, 2);
+    I(0, 0) = 1; I(0, 1) = 0;
+    I(1, 0) = 0; I(1, 1) = 1;
+    Tensor H_sys = H.kronecker(I);
+    H_sys.print();
+    Tensor CNOT(4, 4);
+    CNOT(0, 0) = 1.0;
+    CNOT(1, 1) = 1.0;
+    CNOT(2, 3) = 1.0;
+    CNOT(3, 2) = 1.0;
+    Tensor step1 = H_sys.matmul(q_sys);
+    Tensor entangled = CNOT.matmul(step1);
+    entangled.print();
     return 0;
 }
