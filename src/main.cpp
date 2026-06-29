@@ -45,10 +45,12 @@ int main() {
         std::cerr << "[ERROR] File not found!\n";
         return 1;
     }
-    //file_out << "time_ns,voltage_mV\n";
-    //for (size_t i = 2; i < filtered_data.size(); ++i) {
-    //    file_out << filtered_data[i].time_ns << "," << filtered_data[i].voltage << "\n";
-    //}
+    /*
+    file_out << "time_ns,voltage_mV\n";
+    for (size_t i = 2; i < filtered_data.size(); ++i) {
+        file_out << filtered_data[i].time_ns << "," << filtered_data[i].voltage << "\n";
+    }
+    */
     file_out.close();
 
     double max_voltage = filtered_data[0].voltage;
