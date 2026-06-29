@@ -92,6 +92,11 @@ public:
         return result;
     }
 
+    Tensor change_basis(const Tensor& P) const {
+        if (cols == 1) return P.inverse() * (*this);
+        else if (rows == cols) return P.inverse() * (*this) * P;
+        else throw std::invalid_argument("Cannot change basis for non-square and non-vector tensors");
+    }
     void print() const {
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) std::cout << (*this)(i, j) << "\t";
