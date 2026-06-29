@@ -32,6 +32,21 @@ public:
         return result;
     }
 
+    Tensor matmul_slow(const Tensor& other) const {
+        if (cols != other.rows) {
+            throw std::invalid_argument("Dimension mismatch: cols != other.rows");
+        }
+        Tensor result(rows, other.cols);
+        for (int i = 0; i < rows; ++i) {
+            for (int j = 0; j < cols; ++j) {
+                for (int k = 0; k < other.cols; ++k) {
+                    result(i, j) += (*this)(i, k) * other(k, j);
+                }
+            }
+        }
+        return result;
+    }
+
     Tensor add(const Tensor& other) const {
         if (cols != other.cols || rows != other.rows) {
             throw std::invalid_argument("Dimension mismatch");

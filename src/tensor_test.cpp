@@ -1,4 +1,5 @@
 #include <cmath>
+#include <chrono>
 #include "Tensor.h"
 
 int main() {
@@ -38,6 +39,8 @@ int main() {
     Tensor entangled = CNOT*(step1);
     entangled.print();
     */
+
+    /*
     std::cout << "--- Testing Matrix Inversion ---\n";
     Tensor A(2, 2);
     A(0, 0) = 2.0; A(0, 1) = 1.0;
@@ -53,5 +56,22 @@ int main() {
     Tensor Identity = A * A_inv;
     std::cout << "\nVerification (A * A^-1 = I):\n";
     Identity.print();
+    */
+
+    // matmul test
+    std::cout << "--- Testing different matmull cycles performances ---\n";
+    Tensor A(1000, 1000);
+    Tensor B(1000, 1000);
+    auto start_slow = std::chrono::high_resolution_clock::now();
+    Tensor slow = A.matmul_slow(B);
+    auto finish_slow = std::chrono::high_resolution_clock::now();
+    auto duration_slow = std::chrono::duration_cast<std::chrono::microseconds>(finish_slow - start_slow);
+    std::cout << "Duration of slower methode: " << duration_slow << "mcs\n";
+    auto start_fast = std::chrono::high_resolution_clock::now();
+    Tensor fast = A.matmul(B);
+    auto finish_fast = std::chrono::high_resolution_clock::now();
+    auto duration_fast = std::chrono::duration_cast<std::chrono::microseconds>(finish_fast - start_fast);
+    std::cout << "Duration of faster methode: " << duration_fast << "mcs\n";
+
     return 0;
 }
