@@ -64,6 +64,10 @@ public:
         return result;
     }
 
+    Tensor reverse() const {
+
+    }
+
     void print() const {
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) std::cout << (*this)(i, j) << "\t";
@@ -79,6 +83,10 @@ public:
 
     const double& operator()(size_t r, size_t c) const {
         return data[r * cols + c];
+    }
+
+    Tensor operator*(const Tensor& other) const {
+        return this->matmul(other);
     }
 };
 

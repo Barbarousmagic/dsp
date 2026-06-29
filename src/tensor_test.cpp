@@ -13,7 +13,7 @@ int main() {
     H(1,0) = inv_sqrt2; H(1, 1) = -inv_sqrt2;
     //H.print();
 
-    Tensor superposition = H.matmul(qubit);
+    Tensor superposition = H*(qubit);
     //superposition.print();
     Tensor q0(2, 1);
     q0(0, 0) = 1.0;
@@ -33,8 +33,8 @@ int main() {
     CNOT(1, 1) = 1.0;
     CNOT(2, 3) = 1.0;
     CNOT(3, 2) = 1.0;
-    Tensor step1 = H_sys.matmul(q_sys);
-    Tensor entangled = CNOT.matmul(step1);
+    Tensor step1 = H_sys*(q_sys);
+    Tensor entangled = CNOT*(step1);
     entangled.print();
     return 0;
 }

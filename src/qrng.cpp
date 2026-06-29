@@ -18,7 +18,7 @@ int main() {
     std::cout << "Hadamard Gate (H):" << std::endl;
     H.print();
 
-    Tensor superposition = H.matmul(q0);
+    Tensor superposition = H * q0;
     std::cout << "Superposition state |+>: \n";
     superposition.print();
 
