@@ -23,6 +23,12 @@ A custom mathematical engine built from scratch to simulate quantum logic gates 
 Generates and filters millions of samples of Gaussian noise to test single-thread and OpenMP multi-thread limits.
 - Validates data streams simulating quantum hardware readout electronics.
 
+### 4. Quantum Random Number Generator (QRNG)
+Simulates a quantum measurement process to generate true random bits (in a classic environment).
+- Implements a qubit initialization in $|0\rangle$ state.
+- Applies the Hadamard gate ($H$) to create a uniform superposition ($|0\rangle + |1\rangle$).
+- Simulates wavefunction collapse based on Born's rule using `std::uniform_real_distribution`.
+
 ## Technical Highlights
 - **Hardware-Aware C++:** Strict control over memory layout, loop indexing, and heap fragmentation (`std::vector::reserve`).
 - **Parallel Computing:** Integrates OpenMP for processing large data arrays.
