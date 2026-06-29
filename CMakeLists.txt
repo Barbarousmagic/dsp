@@ -11,3 +11,5 @@ if(OpenMP_CXX_FOUND)
     target_link_libraries(dsp_app PUBLIC OpenMP::OpenMP_CXX)
 endif()
 add_executable(tensor_test src/tensor_test.cpp)
+
+add_executable(csd_2d_filter src/csd_2d_filter.cpp)

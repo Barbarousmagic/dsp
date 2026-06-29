@@ -6,6 +6,7 @@
 #define LINUXTEST_TENSOR_H
 #include <stdexcept>
 #include <vector>
+#include <iostream>
 
 class Tensor {
 private:
@@ -69,6 +70,8 @@ public:
             std::cout << "\n";
         }
     }
+    size_t get_rows() const { return rows; }
+    size_t get_cols() const { return cols; }
 
     double& operator()(size_t r, size_t c){
         return data[r * cols + c];
