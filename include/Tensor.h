@@ -64,8 +64,32 @@ public:
         return result;
     }
 
-    Tensor reverse() const {
-
+    Tensor inverse() const {
+        if (rows != cols) {
+            throw std::invalid_argument("Matrix is not square");
+        }
+        Tensor A = *this;
+        Tensor result (rows, cols);
+        for (size_t i = 0; i < rows; ++i) result(i, i) = 1.0;
+        for (size_t i = 0; i < rows; ++i) {
+            double pivot = A(i, i);
+            if (pivot == 0.0) {
+                throw std::runtime_error("Zero pivot encountered, matrix is singular");
+            }
+            for (size_t j = 0; j < cols; j++) {
+                A(i, j) /= pivot;
+                result(i, j) /= pivot;
+            }
+            for (size_t k = 0; k < rows; k++) {
+                if (k == i) continue;
+                double factor = A(k, i);
+                for (size_t j = 0; j < cols; j++) {
+                    A(k, j) -= factor * A(i, j);
+                    result(k, j) -= factor * result(i, j);
+                }
+            }
+        }
+        return result;
     }
 
     void print() const {
