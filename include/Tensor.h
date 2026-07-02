@@ -160,6 +160,15 @@ public:
         return PauliX;
     }
 
+    static Tensor<T> Y() {
+        Tensor<T> PauliY(2, 2);
+        PauliY(0, 0) = T{0.0};
+        PauliY(0, 1) = T{0.0, -1.0}; // -i
+        PauliY(1, 0) = T{0.0, 1.0}; // i
+        PauliY(1, 1) = T{0.0};
+        return PauliY;
+    }
+
     static Tensor Z() {
         Tensor PauliZ(2, 2);
         PauliZ(0, 0) = 1.0; PauliZ(0, 1) = 0.0;

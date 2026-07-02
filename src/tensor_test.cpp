@@ -1,6 +1,8 @@
 #include <cassert>
 #include <cmath>
 #include <chrono>
+#include <complex>
+
 #include "Tensor.h"
 
 int main() {
@@ -86,6 +88,26 @@ int main() {
 
     std::cout << "Performance difference: " << (double(duration_slow.count() - duration_fast.count()) / duration_slow.count()) * 100.0 << "%\n";
     std::cout << "Passed\n\n";
+
+    std::cout << "[Test 7] Complex Gate Pauli-Y simulation...\n";
+    Tensor<std::complex<double>> cq0(2, 1);
+    cq0(0, 0) = std::complex<double>(1.0, 0.0);
+    cq0(1, 0) = std::complex<double>(0.0, 0.0);
+
+    std::cout << "Initial complex state |0>:\n";
+    cq0.print();
+
+    Tensor<std::complex<double>> Y_gate = Tensor<std::complex<double>>::Y();
+    std::cout << "Pauli-Y gate matrix:\n";
+    Y_gate.print();
+
+    //apply Y to qubit: |0> into i|1>
+    Tensor<std::complex<double>> cq_res = Y_gate * cq0;
+    std::cout << "Result state after Pauli-Y (should be i|1>):\n";
+    cq_res.print();
+    assert(cq_res(0, 0) == std::complex<double>(0.0, 0.0));
+    assert(cq_res(1, 0) == std::complex<double>(0.0, 1.0)); // i
+    std::cout << "Complex Matrix Operations Passed.\n";
 
     std::cout << "===================================================\n";
     std::cout << "   ALL TESTS PASSED SUCCESSFULLY!\n";
