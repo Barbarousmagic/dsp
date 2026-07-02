@@ -15,3 +15,16 @@ add_executable(tensor_test src/tensor_test.cpp)
 add_executable(csd_2d_filter src/csd_2d_filter.cpp)
 
 add_executable(qrng src/qrng.cpp)
+
+include(FetchContent)
+FetchContent_Declare(
+        googletest
+        URL https://github.com/google/googletest/archive/refs/heads/main.zip
+)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(googletest)
+enable_testing()
+add_executable(unit_tests src/unit_tests.cpp)
+target_link_libraries(unit_tests PRIVATE gtest gtest_main)
+include(GoogleTest)
+gtest_discover_tests(unit_tests)
