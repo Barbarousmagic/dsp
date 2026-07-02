@@ -59,6 +59,7 @@ int main() {
     */
 
     // matmul test
+    /*
     std::cout << "--- Testing different matmull cycles performances ---\n";
     Tensor A(1000, 1000);
     Tensor B(1000, 1000);
@@ -72,6 +73,15 @@ int main() {
     auto finish_fast = std::chrono::high_resolution_clock::now();
     auto duration_fast = std::chrono::duration_cast<std::chrono::microseconds>(finish_fast - start_fast);
     std::cout << "Duration of faster methode: " << duration_fast << "mcs\n";
+    */
+    Tensor q0(2, 1); q0(0, 0) = 1.0; // state |0>
+    Tensor q1(2, 1); q1(0, 0) = 1.0; // state |0>
+
+    Tensor state = q0.kronecker(q1); // state 2-qubit-system |00>
+    Tensor H_sys = Tensor::Hadamard().kronecker(Tensor::Identity());
+    Tensor entangled = Tensor::CNOT() * H_sys * state;
+    std::cout << "Bell state:\n";
+    entangled.print();
 
     return 0;
 }

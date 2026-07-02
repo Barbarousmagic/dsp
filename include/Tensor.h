@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <vector>
 #include <iostream>
+#include <cmath>
 
 class Tensor {
 private:
@@ -131,6 +132,42 @@ public:
 
     Tensor operator*(const Tensor& other) const {
         return this->matmul(other);
+    }
+
+    static Tensor Identity() {
+        Tensor I(2, 2);
+        I(0, 0) = 1.0; I(0, 1) = 0.0;
+        I(1, 0) = 0.0; I(1, 1) = 1.0;
+        return I;
+    }
+    static Tensor Hadamard() {
+        Tensor H(2, 2);
+        double inv_sqrt2 = 1.0 / std::sqrt(2.0);
+        H(0, 0) = inv_sqrt2;  H(0, 1) = inv_sqrt2;
+        H(1, 0) = inv_sqrt2;  H(1, 1) = -inv_sqrt2;
+        return H;
+    }
+
+    static Tensor X() {
+        Tensor PauliX(2, 2);
+        PauliX(0, 0) = 0.0; PauliX(0, 1) = 1.0;
+        PauliX(1, 0) = 1.0; PauliX(1, 1) = 0.0;
+        return PauliX;
+    }
+
+    static Tensor Z() {
+        Tensor PauliZ(2, 2);
+        PauliZ(0, 0) = 1.0; PauliZ(0, 1) = 0.0;
+        PauliZ(1, 0) = 0.0; PauliZ(1, 1) = -1.0;
+        return PauliZ;
+    }
+    static Tensor CNOT() {
+        Tensor matrix(4, 4);
+        matrix(0, 0) = 1.0;
+        matrix(1, 1) = 1.0;
+        matrix(2, 3) = 1.0; // Changes |10> and |11>
+        matrix(3, 2) = 1.0;
+        return matrix;
     }
 };
 
