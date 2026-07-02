@@ -1,87 +1,94 @@
+#include <cassert>
 #include <cmath>
 #include <chrono>
 #include "Tensor.h"
 
 int main() {
-    /*
-    Tensor qubit(2,1);
-    qubit(0, 0) = 1.0;
-    qubit(1, 0) = 0.0;
-    qubit.print();
-
-    Tensor H(2, 2);
-    double inv_sqrt2 = 1.0 / std::sqrt(2.0);
-    H(0,0) = inv_sqrt2; H(0, 1) = inv_sqrt2;
-    H(1,0) = inv_sqrt2; H(1, 1) = -inv_sqrt2;
-    H.print();
-
-    Tensor superposition = H*(qubit);
-    superposition.print();
-    Tensor q0(2, 1);
-    q0(0, 0) = 1.0;
-    q0(1, 0) = 0.0;
-    Tensor q1(2, 1);
-    q1(0, 0) = 1.0;
-    q1(1, 0) = 0.0;
-    Tensor q_sys = q0.kronecker(q1);
-    q_sys.print();
-    Tensor I(2, 2);
-    I(0, 0) = 1; I(0, 1) = 0;
-    I(1, 0) = 0; I(1, 1) = 1;
-    Tensor H_sys = H.kronecker(I);
-    H_sys.print();
-    Tensor CNOT(4, 4);
-    CNOT(0, 0) = 1.0;
-    CNOT(1, 1) = 1.0;
-    CNOT(2, 3) = 1.0;
-    CNOT(3, 2) = 1.0;
-    Tensor step1 = H_sys*(q_sys);
-    Tensor entangled = CNOT*(step1);
-    entangled.print();
-    */
-
-    /*
-    std::cout << "--- Testing Matrix Inversion ---\n";
-    Tensor A(2, 2);
-    A(0, 0) = 2.0; A(0, 1) = 1.0;
-    A(1, 0) = 4.0; A(1, 1) = 3.0;
-
-    std::cout << "Original Matrix A:\n";
+    std::cout << "===================================================\n";
+    std::cout << "     RUNNING TEMPLATE TENSOR ALL METHODS TEST\n";
+    std::cout << "===================================================\n";
+    // 1. initialization and indexing
+    std::cout << "[Test 1] Initialization and Indexing...\n";
+    Tensor<double> A(2, 3);
+    A(0, 0) = 1.0; A(0, 1) = 2.0; A(0, 2) = 3.0;
+    A(1, 0) = 4.0; A(1, 1) = 5.0; A(1, 2) = 6.0;
+    std::cout << "Matrix A(2x3):\n";
     A.print();
+    std::cout << "Passed.\n\n";
 
-    Tensor A_inv = A.inverse();
-    std::cout << "\nInverse Matrix A^-1:\n";
-    A_inv.print();
+    // 2. Adding test(add)
+    std::cout << "[Test 2] Matrix addition...\n";
+    Tensor<double> B(2, 3);
+    B(0, 0) = 0.5; B(0, 1) = 1.5; B(0, 2) = 2.5;
+    B(1, 0) = 3.5; B(1, 1) = 4.5; B(1, 2) = 5.5;
+    Tensor<double> C = A + B;
+    std::cout << "Matrix A + B:\n";
+    C.print();
+    assert(C(0, 0) == 1.5 && C(1, 2) == 11.5);
+    std::cout << "Passed\n\n";
 
-    Tensor Identity = A * A_inv;
-    std::cout << "\nVerification (A * A^-1 = I):\n";
-    Identity.print();
-    */
+    // 3. Transpose test
+    std::cout << "[Test 3] Matrix transpose...\n";
+    Tensor<double> A_T = A.transpose();
+    std::cout << "Matrix A^T (3x2):\n";
+    A_T.print();
+    assert(A_T.get_rows() == 3 && A_T.get_cols() == 2);
+    assert(A_T(2, 1) == 6.0);
+    std::cout << "Passed\n\n";
 
-    // matmul test
-    /*
-    std::cout << "--- Testing different matmull cycles performances ---\n";
-    Tensor A(1000, 1000);
-    Tensor B(1000, 1000);
+    //4. Kronecker product test
+    std::cout << "[Test 4] Kronecker product...\n";
+    Tensor<double> I2 = Tensor<double>::Identity();
+    Tensor<double> X2 = Tensor<double>::X();
+    Tensor<double> kron_res = I2.kronecker(X2);
+    std::cout << "Identity (2x2) Kronecker Pauli-X (2x2):\n";
+    kron_res.print();
+    assert(kron_res.get_rows() == 4 && kron_res.get_cols() == 4);
+    assert(kron_res(0, 1) == 1.0 && kron_res(2, 3) == 1.0);
+    std::cout << "Passed\n\n";
+
+    // 5. Inverse and basis change test
+    std::cout << "[Test 5] Matrix inversion (Gauss-Jordan)...\n";
+    Tensor<double> M(2, 2);
+    M(0, 0) = 4.0; M(0, 1) = 7.0;
+    M(1, 0) = 2.0; M(1, 1) = 6.0;
+    std::cout << "Matrix M:\n";
+    M.print();
+    Tensor<double> M_inv = M.inverse();
+    std::cout << "Matrix M^-1:\n";
+    M_inv.print();
+
+    //check: M * M^-1 should be close to I
+    Tensor<double> E = M * M_inv;
+    E.print();
+    assert(std::abs(E(0, 0) - 1.0) < 1e-9 && std::abs(E(0, 1)) < 1e-9);
+    std::cout << "Passed\n\n";
+
+    // 6. Multiplication benchmark
+    std::cout << "[Test 6] Benchmarking matmul vs matmul_slow (1000x1000)...\n";
+    Tensor<double> BigA(1000, 1000);
+    Tensor<double> BigB(1000, 1000);
+    for (size_t i = 0; i < 1000; ++i) {
+        BigA(i, i) = 2.0;
+        BigB(i, i) = 0.5;
+    }
+
     auto start_slow = std::chrono::high_resolution_clock::now();
-    Tensor slow = A.matmul_slow(B);
+    Tensor<double> slow_res = BigA.matmul_slow(BigB);
     auto finish_slow = std::chrono::high_resolution_clock::now();
     auto duration_slow = std::chrono::duration_cast<std::chrono::microseconds>(finish_slow - start_slow);
-    std::cout << "Duration of slower methode: " << duration_slow << "mcs\n";
+    std::cout << "Duration of slow method (i-j-k): " << duration_slow.count() << " mcs\n";
     auto start_fast = std::chrono::high_resolution_clock::now();
-    Tensor fast = A.matmul(B);
+    Tensor<double> fast_res = BigA.matmul(BigB);
     auto finish_fast = std::chrono::high_resolution_clock::now();
     auto duration_fast = std::chrono::duration_cast<std::chrono::microseconds>(finish_fast - start_fast);
-    std::cout << "Duration of faster methode: " << duration_fast << "mcs\n";
-    */
-    Tensor q0(2, 1); q0(0, 0) = 1.0; // state |0>
-    Tensor q1(2, 1); q1(0, 0) = 1.0; // state |0>
+    std::cout << "Duration of fast method (i-k-j): " << duration_fast.count() << " mcs\n";
 
-    Tensor state = q0.kronecker(q1); // state 2-qubit-system |00>
-    Tensor H_sys = Tensor::Hadamard().kronecker(Tensor::Identity());
-    Tensor entangled = Tensor::CNOT() * H_sys * state;
-    std::cout << "Bell state:\n";
-    entangled.print();
+    std::cout << "Performance difference: " << (double(duration_slow.count() - duration_fast.count()) / duration_slow.count()) * 100.0 << "%\n";
+    std::cout << "Passed\n\n";
 
+    std::cout << "===================================================\n";
+    std::cout << "   ALL TESTS PASSED SUCCESSFULLY!\n";
+    std::cout << "===================================================\n";
     return 0;
 }

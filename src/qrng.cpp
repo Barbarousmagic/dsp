@@ -6,19 +6,19 @@
 #include <random>
 
 int main() {
-    Tensor q0(2, 1);
+    Tensor<double> q0(2, 1);
     q0(0, 0) = 1.0;
     std::cout << "initial state |0>:\n";
     q0.print();
 
-    Tensor H(2, 2);
+    Tensor<double> H(2, 2);
     double inv_sqrt2 = 1.0 / std::sqrt(2);
     H(0, 0) = inv_sqrt2; H(0, 1) = inv_sqrt2;
     H(1, 0) = inv_sqrt2; H(1, 1) = -inv_sqrt2;
     std::cout << "Hadamard Gate (H):" << std::endl;
     H.print();
 
-    Tensor superposition = H * q0;
+    Tensor<double> superposition = H * q0;
     std::cout << "Superposition state |+>: \n";
     superposition.print();
 

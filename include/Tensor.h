@@ -9,16 +9,17 @@
 #include <iostream>
 #include <cmath>
 
+template <typename T>
 class Tensor {
 private:
     size_t rows;
     size_t cols;
-    std::vector<double> data;
+    std::vector<T> data;
 public:
     Tensor (size_t r, size_t c) : rows(r), cols(c) {
-        data.resize(rows * cols, 0.0);
+        data.resize(rows * cols, T{});
     }
-    Tensor matmul(const Tensor& other) const {
+    Tensor<T> matmul(const Tensor<T>& other) const {
         if (cols != other.rows) {
             throw std::invalid_argument("Dimension mismatch: cols != other.rows");
         }
@@ -33,7 +34,7 @@ public:
         return result;
     }
 
-    Tensor matmul_slow(const Tensor& other) const {
+    Tensor<T> matmul_slow(const Tensor<T>& other) const {
         if (cols != other.rows) {
             throw std::invalid_argument("Dimension mismatch: cols != other.rows");
         }
@@ -48,26 +49,26 @@ public:
         return result;
     }
 
-    Tensor add(const Tensor& other) const {
+    Tensor<T> add(const Tensor<T>& other) const {
         if (cols != other.cols || rows != other.rows) {
             throw std::invalid_argument("Dimension mismatch");
         }
-        Tensor result(rows, cols);
+        Tensor<T> result(rows, cols);
         for (size_t i = 0; i < data.size(); ++i) {
             result.data[i] =  data[i] + other.data[i];
         }
         return result;
     }
-    Tensor transpose() const {
-        Tensor result(cols, rows);
+    Tensor<T> transpose() const {
+        Tensor<T> result(cols, rows);
         for (int i = 0; i < rows; ++i) {
             for (int j = 0; j < cols; ++j) result(j, i) = (*this)(i, j);
         }
         return result;
     }
 
-    Tensor kronecker(const Tensor& other) const {
-        Tensor result(rows * other.rows, cols * other.cols);
+    Tensor<T> kronecker(const Tensor& other) const {
+        Tensor<T> result(rows * other.rows, cols * other.cols);
         for (size_t i = 0; i < rows; ++i) {
             for (size_t j = 0; j < cols; ++j) {
                 for (size_t k = 0; k < other.rows; ++k) {
@@ -80,16 +81,16 @@ public:
         return result;
     }
 
-    Tensor inverse() const {
+    Tensor<T> inverse() const {
         if (rows != cols) {
             throw std::invalid_argument("Matrix is not square");
         }
-        Tensor A = *this;
-        Tensor result (rows, cols);
+        Tensor<T> A = *this;
+        Tensor<T> result (rows, cols);
         for (size_t i = 0; i < rows; ++i) result(i, i) = 1.0;
         for (size_t i = 0; i < rows; ++i) {
-            double pivot = A(i, i);
-            if (pivot == 0.0) {
+            T pivot = A(i, i);
+            if (std::abs(pivot) == 0.0) {
                 throw std::runtime_error("Zero pivot encountered, matrix is singular");
             }
             for (size_t j = 0; j < cols; j++) {
@@ -98,7 +99,7 @@ public:
             }
             for (size_t k = 0; k < rows; k++) {
                 if (k == i) continue;
-                double factor = A(k, i);
+                T factor = A(k, i);
                 for (size_t j = 0; j < cols; j++) {
                     A(k, j) -= factor * A(i, j);
                     result(k, j) -= factor * result(i, j);
@@ -108,7 +109,7 @@ public:
         return result;
     }
 
-    Tensor change_basis(const Tensor& P) const {
+    Tensor<T> change_basis(const Tensor<T>& P) const {
         if (cols == 1) return P.inverse() * (*this);
         else if (rows == cols) return P.inverse() * (*this) * P;
         else throw std::invalid_argument("Cannot change basis for non-square and non-vector tensors");
@@ -122,15 +123,19 @@ public:
     size_t get_rows() const { return rows; }
     size_t get_cols() const { return cols; }
 
-    double& operator()(size_t r, size_t c){
+    T& operator()(const size_t r, const size_t c) {
         return data[r * cols + c];
     }
 
-    const double& operator()(size_t r, size_t c) const {
+    const T& operator()(const size_t r, const size_t c) const {
         return data[r * cols + c];
     }
 
-    Tensor operator*(const Tensor& other) const {
+    Tensor<T> operator+(const Tensor<T>& other) const {
+        return this->add(other);
+    }
+
+    Tensor<T> operator*(const Tensor<T>& other) const {
         return this->matmul(other);
     }
 
