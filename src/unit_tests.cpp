@@ -2,6 +2,8 @@
 #include "Tensor.h"
 #include <complex>
 
+#include "QuantumCircuit.h"
+
 TEST(TensorMathTest, RealAddition) {
     Tensor<double> A(2, 2);
     A(0, 0) = 1.0; A(0, 1) = 2.0;
@@ -27,4 +29,14 @@ TEST(QuantumSimulationTest, ComplexPauliY) {
 
     EXPECT_EQ(res(0, 0), std::complex<double>(0.0, 0.0));
     EXPECT_EQ(res(1, 0), std::complex<double>(0.0, 1.0));
+}
+
+TEST(QuantumCircuitTest, HadamardExecution) {
+    QuantumCircuit<double> qc(2);
+    std::cout << "\n[INFO] State BEFORE Hadamard Gate:\n";
+    qc.print_state();
+    qc.h(0);
+    std::cout << "\n[INFO] State AFTER Hadamard Gate:\n";
+    qc.print_state();
+    SUCCEED();
 }
