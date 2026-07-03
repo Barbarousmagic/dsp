@@ -40,3 +40,13 @@ TEST(QuantumCircuitTest, HadamardExecution) {
     qc.print_state();
     SUCCEED();
 }
+
+TEST(QuantumCircuitTest, BellStatePreparation) {
+    QuantumCircuit<double> qc(2);
+    qc.h(0);
+    qc.cnot(0, 1);
+    std::cout << "\n[INFO] Resulting Bell State amplitudes:\n";
+    qc.print_state();
+
+    SUCCEED();
+}

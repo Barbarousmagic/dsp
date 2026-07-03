@@ -69,11 +69,11 @@ public:
 
     Tensor<T> kronecker(const Tensor& other) const {
         Tensor<T> result(rows * other.rows, cols * other.cols);
-        for (size_t i = 0; i < rows; ++i) {
-            for (size_t j = 0; j < cols; ++j) {
-                for (size_t k = 0; k < other.rows; ++k) {
-                    for (size_t l = 0; l < other.cols; ++l) {
-                        result(i * other.rows + k, j * other.cols + l) = (*this)(i, j) * other(k, l);
+        for (size_t rA = 0; rA < rows; ++rA) {
+            for (size_t cA = 0; cA < cols; ++cA) {
+                for (size_t rB = 0; rB < other.rows; ++rB) {
+                    for (size_t cB = 0; cB < other.cols; ++cB) {
+                        result(rA * other.rows + rB, cA * other.cols + cB) = (*this)(rA, cA) * other(rB, cB);
                     }
                 }
             }
@@ -153,8 +153,8 @@ public:
         return H;
     }
 
-    static Tensor X() {
-        Tensor PauliX(2, 2);
+    static Tensor<T> X() {
+        Tensor<T> PauliX(2, 2);
         PauliX(0, 0) = 0.0; PauliX(0, 1) = 1.0;
         PauliX(1, 0) = 1.0; PauliX(1, 1) = 0.0;
         return PauliX;
@@ -181,6 +181,18 @@ public:
         matrix(1, 1) = 1.0;
         matrix(2, 3) = 1.0; // Changes |10> and |11>
         matrix(3, 2) = 1.0;
+        return matrix;
+    }
+    static Tensor P0() {
+        Tensor matrix(2, 2);
+        matrix(0, 0) = 1; matrix(0, 1) = 0;
+        matrix(1, 0) = 0; matrix(1, 1) = 0;
+        return matrix;
+    }
+    static Tensor P1() {
+        Tensor matrix(2, 2);
+        matrix(0, 0) = 0; matrix(0, 1) = 0;
+        matrix(1, 0) = 0; matrix(1, 1) = 1;
         return matrix;
     }
 };
