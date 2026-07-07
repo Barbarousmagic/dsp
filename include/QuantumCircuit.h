@@ -14,11 +14,12 @@ enum class Backend {
     CustomCPU,
     CudaQGPU
 };
-enum class GateType { H, CNOT };
+enum class GateType { H, CNOT, X, Y, Z, RX, RY, RZ };
 struct Operation {
     GateType type;
     size_t target;
     size_t control;
+    double angle;
 };
 template <typename T>
 class QuantumCircuit {
@@ -32,17 +33,22 @@ public:
         : num_qubits(qubits), backend(b), state(1 << qubits, 1) {
         if (backend == Backend::CustomCPU) state(0, 0) = T{1.0}; // start state |00...0>
     }
-    void print_state() const {
-        state.print();
-    }
+    void print_state() const { state.print(); }
     // --- Phase 1: circuit layout ---
-    void h(size_t target) {
-        operations.push_back({GateType::H, target, static_cast<size_t>(-1)});
-    }
+    // basic gates:
+    void h(size_t target) { operations.push_back({GateType::H, target, static_cast<size_t>(-1)}); }
+    void cnot(size_t control, size_t target) { operations.push_back({GateType::CNOT, target, control}); }
 
-    void cnot(size_t control, size_t target) {
-        operations.push_back({GateType::CNOT, target, control});
-    }
+    // Pauli matrix
+    void x(size_t target) { operations.push_back({GateType::X, target, static_cast<size_t>(-1), 0.0}); }
+    void y(size_t target) { operations.push_back({GateType::Y, target, static_cast<size_t>(-1), 0.0}); }
+    void z(size_t target) { operations.push_back({GateType::Z, target, static_cast<size_t>(-1), 0.0}); }
+
+    // parametric rotates
+    void rx(double angle, size_t target) { operations.push_back({GateType::RX, target, static_cast<size_t>(-1), angle}); }
+    void ry(double angle, size_t target) { operations.push_back({GateType::RY, target, static_cast<size_t>(-1), angle}); }
+    void rz(double angle, size_t target) { operations.push_back({GateType::RZ, target, static_cast<size_t>(-1), angle}); }
+
     // --- Phase 2: Running
     void sample(int shots = 1000) {
         if (backend == Backend::CustomCPU) {
@@ -53,6 +59,33 @@ public:
             std::cout << "[INFO] Running on CUDA-Q GPU...\n";
             execute_cudaq(shots);
         }
+    }
+    // --- Circuit visualisation ---
+    void print_circuit() const {
+        std::cout << "\n=== Quantum Circuit ===\n";
+        for (size_t i = 0; i < num_qubits; ++i) {
+            std::cout << "q[" << i << "]: --";
+            for (const auto& op : operations) {
+                if (op.target == i) {
+                    switch (op.type) {
+                        case GateType::H:    std::cout << "[ H ]--"; break;
+                        case GateType::X:    std::cout << "[ X ]--"; break;
+                        case GateType::Y:    std::cout << "[ Y ]--"; break;
+                        case GateType::Z:    std::cout << "[ Z ]--"; break;
+                        case GateType::RX:   std::cout << "[Rx ]--"; break;
+                        case GateType::RY:   std::cout << "[Ry ]--"; break;
+                        case GateType::RZ:   std::cout << "[Rz ]--"; break;
+                        case GateType::CNOT: std::cout << "[ X ]--"; break; // Target for CNOT
+                    }
+                } else if (op.control == i) {
+                    std::cout << "[ * ]--";
+                } else {
+                    std::cout << "-------";
+                }
+            }
+            std::cout << "[M]\n";
+        }
+        std::cout << "=======================\n";
     }
 private:
     void execute_cpu() {
@@ -100,10 +133,15 @@ private:
         auto q = kernel.qalloc(num_qubits);
 
         for (const auto& op : operations) {
-            if (op.type == GateType::H) {
-                kernel.h(q[op.target]);
-            } else if (op.type == GateType::CNOT) {
-                kernel.x<cudaq::ctrl>(q[op.control], q[op.target]);
+            switch (op.type) {
+                case GateType::H:    kernel.h(q[op.target]); break;
+                case GateType::CNOT: kernel.x<cudaq::ctrl>(q[op.control], q[op.target]); break;
+                case GateType::X:    kernel.x(q[op.target]); break;
+                case GateType::Y:    kernel.y(q[op.target]); break;
+                case GateType::Z:    kernel.z(q[op.target]); break;
+                case GateType::RX:   kernel.rx(op.angle, q[op.target]); break;
+                case GateType::RY:   kernel.ry(op.angle, q[op.target]); break;
+                case GateType::RZ:   kernel.rz(op.angle, q[op.target]); break;
             }
         }
 
