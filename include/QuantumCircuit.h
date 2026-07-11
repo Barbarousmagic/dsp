@@ -20,6 +20,7 @@ struct Operation {
     size_t target;
     size_t control;
     double angle;
+    size_t classical_control;
 };
 template <typename T>
 class QuantumCircuit {
@@ -36,18 +37,21 @@ public:
     void print_state() const { state.print(); }
     // --- Phase 1: circuit layout ---
     // basic gates:
-    void h(size_t target) { operations.push_back({GateType::H, target, static_cast<size_t>(-1)}); }
-    void cnot(size_t control, size_t target) { operations.push_back({GateType::CNOT, target, control}); }
+    void h(size_t target) { operations.push_back({GateType::H, target, static_cast<size_t>(-1), 0.0, static_cast<size_t>(-1)}); }
+    void cnot(size_t control, size_t target) { operations.push_back({GateType::CNOT, target, control, 0.0, static_cast<size_t>(-1)}); }
 
     // Pauli matrix
-    void x(size_t target) { operations.push_back({GateType::X, target, static_cast<size_t>(-1), 0.0}); }
-    void y(size_t target) { operations.push_back({GateType::Y, target, static_cast<size_t>(-1), 0.0}); }
-    void z(size_t target) { operations.push_back({GateType::Z, target, static_cast<size_t>(-1), 0.0}); }
+    void x(size_t target) { operations.push_back({GateType::X, target, static_cast<size_t>(-1), 0.0, static_cast<size_t>(-1)}); }
+    void y(size_t target) { operations.push_back({GateType::Y, target, static_cast<size_t>(-1), 0.0, static_cast<size_t>(-1)}); }
+    void z(size_t target) { operations.push_back({GateType::Z, target, static_cast<size_t>(-1), 0.0, static_cast<size_t>(-1)}); }
 
     // parametric rotates
-    void rx(double angle, size_t target) { operations.push_back({GateType::RX, target, static_cast<size_t>(-1), angle}); }
-    void ry(double angle, size_t target) { operations.push_back({GateType::RY, target, static_cast<size_t>(-1), angle}); }
-    void rz(double angle, size_t target) { operations.push_back({GateType::RZ, target, static_cast<size_t>(-1), angle}); }
+    void rx(double angle, size_t target) { operations.push_back({GateType::RX, target,
+        static_cast<size_t>(-1), angle, static_cast<size_t>(-1)}); }
+    void ry(double angle, size_t target) { operations.push_back({GateType::RY, target,
+        static_cast<size_t>(-1), angle, static_cast<size_t>(-1)}); }
+    void rz(double angle, size_t target) { operations.push_back({GateType::RZ, target,
+        static_cast<size_t>(-1), angle, static_cast<size_t>(-1)}); }
 
     // --- Phase 2: Running
     void sample(int shots = 1000) {
@@ -79,9 +83,7 @@ public:
                     }
                 } else if (op.control == i) {
                     std::cout << "[ * ]--";
-                } else {
-                    std::cout << "-------";
-                }
+                } else { std::cout << "-------"; }
             }
             std::cout << "[M]\n";
         }
@@ -146,12 +148,13 @@ private:
         }
 
         kernel.mz(q);
-
         auto counts = cudaq::sample(shots, kernel);
 
-        counts.dump();
+        for (auto& [bitstring, count] : counts) {
+            double percentage = (count * 100.0) / shots;
+            std::cout << "State |" << bitstring << "> : " << percentage << "%\n";
+        }
     }
-
 };
 
 #endif //LINUXTEST_QUANTUMCIRCUIT_H
